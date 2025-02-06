@@ -1,3 +1,4 @@
+### clean.py --- Cleans the Dataset
 import pandas as pd 
 
 df = pd.read_csv('../dataset/nyc_dataset.csv')
@@ -11,3 +12,6 @@ df = df[df['@id'].str.isdigit()]
 
 # Drop Duplicates
 df.drop_duplicates(subset=['@id'], inplace=True)
+
+# Save Cleaned Dataset
+df.to_csv('../dataset/clean_nyc_dataset.csv')
