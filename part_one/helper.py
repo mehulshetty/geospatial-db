@@ -8,3 +8,8 @@ def euclidean_distance(point_x, point_y) -> float:
 
     distance = math.sqrt(math.pow((x2 - x1), 2) + math.pow((y2 - y1), 2))
     return distance
+
+def check_bucket(lat, lon, cell_size) -> tuple:
+    lat_bucket = round(lat / cell_size)
+    lon_bucket = round(lon / cell_size)
+    return (lat_bucket, lon_bucket)
