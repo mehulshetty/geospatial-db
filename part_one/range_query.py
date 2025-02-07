@@ -17,7 +17,7 @@ def range_query_linear_search(dataset: pd.DataFrame, target_id: int, r: float):
         r (float): The distance within which to find the POIs.
 
     Returns:
-        list: A list of the '@id' and '@dist' of the k-nearest neighbors.
+        list: A list of the '@id' and '@dist' of all nearby POIs.
     """
 
     POI = dataset.loc[dataset['@id'] == target_id].iloc[0]
