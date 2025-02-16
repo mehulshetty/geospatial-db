@@ -206,7 +206,6 @@ def plot_grid_results(knn_df, range_df):
 
     return None
 
-
 df = pd.read_csv('../dataset/clean_nyc_dataset.csv')
 
 # Experiment Configuration
