@@ -1,6 +1,8 @@
 ### helper.py --- Contains helper functions for the algorithms
 
 import math
+import pandas as pd
+import matplotlib.pyplot as plt
 
 def euclidean_distance(point_x, point_y) -> float:
     x1, y1 = point_x['@lat'], point_x['@lon']
@@ -26,3 +28,23 @@ def expand_search_area(cells):
         for x in range(min_x-1, max_x+2)
         for y in range(min_y-1, max_y+2)
     ]
+
+def plot_query(data: pd.DataFrame, param: str, title: str, label_prefix: str):
+        """Helper function to plot query results with common formatting"""
+        plt.figure(figsize=(12, 6))
+        linestyle = '--' if param in ['k', 'r'] else '-'
+        
+        for value in data[param].unique():
+            subset = data[data[param] == value]
+            plt.plot(subset['N'], subset['time'], 
+                     marker='o', linestyle=linestyle,
+                     label=f'{label_prefix}{value})' if param in ['k', 'r'] else f'{label_prefix}{value}')
+        
+        plt.title(title)
+        plt.xlabel("Dataset Size (N)")
+        plt.ylabel("Query Execution Time (s)")
+        plt.xscale('log')
+        plt.yscale('log')
+        plt.legend()
+        plt.grid(True)
+        plt.show()

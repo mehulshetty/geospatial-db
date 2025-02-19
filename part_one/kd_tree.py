@@ -2,10 +2,9 @@
 # recursively partitions the space into half-spaces, adapting to the data distribution
 
 import random
-import math
 import pandas as pd
 import time
-from helper import euclidean_distance
+from helper import euclidean_distance, plot_query
 
 class Node:
     """
@@ -54,7 +53,7 @@ def knn_kd_search(root: Node, target_poi: dict, k: int):
     Finds the k-nearest neighbors to a target POI using KD-Tree search.
     
     Parameters:
-        root (KDNode): The root node of the KD-Tree.
+        root (Node): The root node of the KD-Tree.
         target_poi (dict): The target POI with '@lat' and '@lon'.
         k (int): The number of nearest neighbors to find.
     
@@ -149,16 +148,13 @@ def range_query_kd(root: Node, target_poi: dict, r: float):
     results.sort(key=lambda x: x[1])  # Sort by distance
     return results
 
-def kd_tree_performance_experiment(dataset, N_list, k_list, r_list, iterations=5):
+def kd_tree_experiments(dataset, config):
     """
     Tests KD-Tree performance with different dataset sizes and query parameters.
     
     Parameters:
         dataset: Full POI dataset
-        N_list: List of dataset sizes to test
-        k_list: List of k values for KNN
-        r_list: List of radius values for range queries
-        iterations: Number of test repetitions
+        config: The set of configurations for the experiment
     
     Returns:
         Tuple of (knn_results, range_results) DataFrames
@@ -166,9 +162,8 @@ def kd_tree_performance_experiment(dataset, N_list, k_list, r_list, iterations=5
     knn_results = []
     range_results = []
     
-    for n in N_list:
+    for n in config["N_list"]:
         mini_df = dataset.iloc[:min(n, len(dataset))].copy()
-        if len(mini_df) < 10: continue  # Skip if too small
         
         # Build KD-Tree once per N
         start_build = time.perf_counter()
@@ -178,54 +173,40 @@ def kd_tree_performance_experiment(dataset, N_list, k_list, r_list, iterations=5
         print(f"Built KD-Tree for N={n} in {build_time:.4f}s")
         
         # KNN Tests
-        for k in k_list:
-            times = []
-            for _ in range(iterations):
-                target_id = random.choice(mini_df['@id'].values)
-                target_poi = mini_df[mini_df['@id'] == target_id].iloc[0]
-                
-                start = time.perf_counter()
-                knn_kd_search(root, target_poi, k)
-                times.append(time.perf_counter() - start)
+        for k in config["k_list"]:
+            target_id = random.choice(mini_df['@id'].values)
+            target_poi = mini_df[mini_df['@id'] == target_id].iloc[0]
+            
+            start = time.perf_counter()
+            knn_kd_search(root, target_poi, k)
+            total_time = time.perf_counter() - start
             
             knn_results.append({
                 'N': n,
                 'k': k,
-                'time': sum(times) / iterations
+                'time': total_time
             })
         
         # Range Query Tests
-        for r in r_list:
-            times = []
-            for _ in range(iterations):
-                target_id = random.choice(mini_df['@id'].values)
-                target_poi = mini_df[mini_df['@id'] == target_id].iloc[0]
-                
-                start = time.perf_counter()
-                range_query_kd(root, target_poi, r)
-                times.append(time.perf_counter() - start)
+        for r in config["r_list"]:
+            target_id = random.choice(mini_df['@id'].values)
+            target_poi = mini_df[mini_df['@id'] == target_id].iloc[0]
+            
+            start = time.perf_counter()
+            range_query_kd(root, target_poi, r)
+            total_time = time.perf_counter() - start
             
             range_results.append({
                 'N': n,
                 'r': r,
-                'time': sum(times) / iterations
+                'time': total_time
             })
     
     return pd.DataFrame(knn_results), pd.DataFrame(range_results)
 
-df = pd.read_csv('../dataset/clean_nyc_dataset.csv')
+def plot_results(knn_results: pd.DataFrame, range_results: pd.DataFrame):
 
-# Experiment Configuration
-config = {
-    'N_list': [1000, 10000, 100000, 825171],
-    'k_list': [1, 5, 10, 50, 100, 500],
-    'r_list': [0.01, 0.05, 0.1, 0.2, 0.5],
-    'iterations': 5
-}
+    plot_query(knn_results, 'k', "KD-Tree Index - kNN Query Performance", "k=")
+    plot_query(range_results, 'r', "KD-Tree Index - Range Query Performance", "r=")
 
-# Run experiments
-knn_results, range_results = kd_tree_performance_experiment(df, config['N_list'], config['k_list'], config['r_list'])
-
-# Save results
-knn_results.to_csv('kd_tree_knn_results.csv', index=False)
-range_results.to_csv('kd_tree_range_results.csv', index=False)
+    return None

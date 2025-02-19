@@ -1,7 +1,7 @@
 ### grid_index.py --- Builds a grid index which divides the space into uniform cells 
 # and assigns each point to a cell based on its coordinates
 
-from helper import check_bucket, euclidean_distance, expand_search_area
+from helper import check_bucket, euclidean_distance, expand_search_area, plot_query
 import pandas as pd
 import math
 import pandas as pd
@@ -102,17 +102,13 @@ def range_query_grid(dataset: pd.DataFrame, grid_index: dict, target_id: int, r:
     
     return sorted(results, key=lambda x: x[1])
 
-def grid_performance_experiment(dataset, cell_sizes, N_list, k_list, r_list, iterations=5):
+def grid_experiments(dataset, config):
     """
     Tests grid index performance with different cell sizes
     
     Parameters:
         dataset: Full POI dataset
-        cell_sizes: List of cell sizes to test
-        N_list: List of dataset sizes to test
-        k_list: List of k values for KNN
-        r_list: List of radius values for range queries
-        iterations: Number of test repetitions
+        config: The set of configurations for the experiment
     
     Returns:
         Tuple of (knn_results, range_results) DataFrames
@@ -122,110 +118,53 @@ def grid_performance_experiment(dataset, cell_sizes, N_list, k_list, r_list, ite
     knn_results = []
     range_results = []
     
-    for cell_size in cell_sizes:
-        print(f"\n=== Testing cell size: {cell_size} ===")
+    for cell_size in config["cell_sizes"]:
         
-        for n in N_list:
+        for n in config["N_list"]:
             # Create subset
             mini_df = dataset.iloc[:min(n, len(dataset))].copy()
-            if len(mini_df) < 10: continue  # Skip if too small
             
             # Build grid once per cell_size/N combination
             grid = build_grid_index(mini_df, cell_size)
             
             # KNN Tests
-            for k in k_list:
-                times = []
-                for _ in range(iterations):
-                    target_id = random.choice(mini_df['@id'].values)
-                    
-                    start = time.perf_counter()
-                    knn_grid_search(mini_df, grid, target_id, k, cell_size)
-                    times.append(time.perf_counter() - start)
+            for k in config["k_list"]:
+                target_id = random.choice(mini_df['@id'].values)
+                
+                start = time.perf_counter()
+                knn_grid_search(mini_df, grid, target_id, k, cell_size)
+                total_time = time.perf_counter() - start
                 
                 knn_results.append({
                     'cell_size': cell_size,
                     'N': n,
                     'k': k,
-                    'time': sum(times)/iterations
+                    'time': total_time
                 })
             
             # Range Query Tests
-            for r in r_list:
-                times = []
-                for _ in range(iterations):
-                    target_id = random.choice(mini_df['@id'].values)
-                    
-                    start = time.perf_counter()
-                    range_query_grid(mini_df, grid, target_id, r, cell_size)
-                    times.append(time.perf_counter() - start)
+            for r in config["r_list"]:
+                target_id = random.choice(mini_df['@id'].values)
+                
+                start = time.perf_counter()
+                range_query_grid(mini_df, grid, target_id, r, cell_size)
+                total_time = time.perf_counter() - start
                 
                 range_results.append({
                     'cell_size': cell_size,
                     'N': n,
                     'r': r,
-                    'time': sum(times)/iterations
+                    'time': total_time
                 })
     
     return pd.DataFrame(knn_results), pd.DataFrame(range_results)
 
-def plot_grid_results(knn_df, range_df):
-    """Generate comparison plots for grid experiments"""
-    
-    # KNN Performance Plot
-    plt.figure(figsize=(12, 6))
-    for cell_size in knn_df['cell_size'].unique():
-        subset = knn_df[knn_df['cell_size'] == cell_size]
-        plt.plot(subset['N'], subset['time'], 
-                marker='o', label=f'Cell {cell_size}')
-    
-    plt.title("KNN Query Time by Grid Cell Size")
-    plt.xlabel("Dataset Size (N)")
-    plt.ylabel("Average Time (s)")
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-    
-    # Range Query Performance Plot
-    plt.figure(figsize=(12, 6))
-    for cell_size in range_df['cell_size'].unique():
-        subset = range_df[range_df['cell_size'] == cell_size]
-        plt.plot(subset['N'], subset['time'],
-                marker='o', label=f'Cell {cell_size}')
-    
-    plt.title("Range Query Time by Grid Cell Size")
-    plt.xlabel("Dataset Size (N)")
-    plt.ylabel("Average Time (s)")
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+def plot_results(knn_results: pd.DataFrame, range_results: pd.DataFrame):
+
+    plot_query(knn_results, 'cell_size', "Grid Index - KNN Query Performance", "Cell ")
+    plot_query(range_results, 'cell_size', "Grid Index - Range Query Performance", "Cell ")
 
     return None
-
-df = pd.read_csv('../dataset/clean_nyc_dataset.csv')
-
-# Experiment Configuration
-config = {
-    'cell_sizes': [0.01, 0.05, 0.1, 0.2],
-    'N_list': [1000, 10000, 100000, 825171],
-    'k_list': [1, 5, 10, 50, 100, 500],
-    'r_list': [0.01, 0.05, 0.1, 0.2, 0.5],
-    'iterations': 5
-}
-
-# Run experiments
-knn_results, range_results = grid_performance_experiment(df, **config)
-
-# Save results
-knn_results.to_csv('grid_knn_results.csv', index=False)
-range_results.to_csv('grid_range_results.csv', index=False)
-
-# Generate plots
-plot_grid_results(knn_results, range_results)
 
 
 
