@@ -1,4 +1,4 @@
-### brute_force.py --- Finds all POIs within a specified distance r from a target POI using linear search
+### brute_force.py --- Finds kNN and Range Queries using brute force methods.
 
 from helper import euclidean_distance, plot_query
 import pandas as pd
@@ -66,6 +66,7 @@ def brute_force_experiments(dataset: pd.DataFrame, config: dict):
     for n in config["N_list"]:
         mini_df = dataset.iloc[:n].copy()
 
+        # KNN Tests
         for k in config["k_list"]:
             target_id = random.choice(mini_df['@id'].values)
 
@@ -97,6 +98,13 @@ def brute_force_experiments(dataset: pd.DataFrame, config: dict):
 
 # Plot the Data
 def plot_brute_force(knn_results: pd.DataFrame, range_results: pd.DataFrame):
+    """
+    Plots a graph of all the results from the experiments.
+    
+    Parameters:
+        knn_results (pd.DataFrame): A DataFrame containing the time, N, and k values for kNN.
+        range_results (pd.DataFrame): A DataFrame containing the time, N, and r values for Range Query.
+    """
 
     plot_query(knn_results, 'k', "Brute Force - kNN Query Performance", "k=")
     plot_query(range_results, 'r', "Brute Force - Range Query Performance", "r=")

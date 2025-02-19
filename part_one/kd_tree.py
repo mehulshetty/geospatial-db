@@ -1,5 +1,6 @@
 ### kd_tree.py --- Creates a KD-Tree Indes which is a binary search tree that 
 # recursively partitions the space into half-spaces, adapting to the data distribution
+# and finds its execution time for kNN and Range queries
 
 import random
 import pandas as pd
@@ -16,7 +17,7 @@ class Node:
         self.left = left    # Left subtree
         self.right = right  # Right subtree
 
-def build_kd_tree(dataset: pd.DataFrame):
+def build_kd_tree(dataset: pd.DataFrame) -> Node:
     """
     Constructs a KD-Tree from the dataset.
     
@@ -26,9 +27,10 @@ def build_kd_tree(dataset: pd.DataFrame):
     Returns:
         Node: The root node of the constructed KD-Tree.
     """
-    points = dataset.to_dict('records')  # Convert DataFrame to list of dictionaries
+    points = dataset.to_dict('records')
     
     def build(points, depth=0):
+        
         if not points:
             return None
         
@@ -60,7 +62,7 @@ def knn_kd_search(root: Node, target_poi: dict, k: int):
     Returns:
         list: A list of the '@id' and '@dist' of the k-nearest neighbors.
     """
-    results = []  # List to store (distance, poi) tuples
+    results = []
     
     def search(node, depth=0):
         if node is None:
@@ -98,7 +100,7 @@ def knn_kd_search(root: Node, target_poi: dict, k: int):
             search(far_child, depth + 1)
     
     search(root)
-    results.sort(key=lambda x: x[0])  # Final sort
+    results.sort(key=lambda x: x[0])
     return [(p['@id'], d) for d, p in results]
 
 def range_query_kd(root: Node, target_poi: dict, r: float):
@@ -205,7 +207,14 @@ def kd_tree_experiments(dataset: pd.DataFrame, config: dict):
     return pd.DataFrame(knn_results), pd.DataFrame(range_results)
 
 def plot_kd(knn_results: pd.DataFrame, range_results: pd.DataFrame):
+    """
+    Plots a graph of all the results from the experiments.
     
+    Parameters:
+        knn_results (pd.DataFrame): A DataFrame containing the time, N, and k values for kNN.
+        range_results (pd.DataFrame): A DataFrame containing the time, N, and r values for Range Query.
+    """
+
     plot_query(knn_results, 'k', "KD-Tree Index - kNN Query Performance", "k=")
     plot_query(range_results, 'r', "KD-Tree Index - Range Query Performance", "r=")
 

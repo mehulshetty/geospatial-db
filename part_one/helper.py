@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 def euclidean_distance(point_x, point_y) -> float:
+    # Calculate euclidean distance between two points
     x1, y1 = point_x['@lat'], point_x['@lon']
     x2, y2 = point_y['@lat'], point_y['@lon']
 
@@ -13,6 +14,7 @@ def euclidean_distance(point_x, point_y) -> float:
     return distance
 
 def check_bucket(lat, lon, cell_size) -> tuple:
+    # Returns what bucket a poi belongs to
     lat_bucket = round(lat / cell_size)
     lon_bucket = round(lon / cell_size)
     return (lat_bucket, lon_bucket)
@@ -31,7 +33,7 @@ def expand_search_area(cells):
     ]
 
 def plot_query(data: pd.DataFrame, param: str, title: str, label_prefix: str):
-    """Helper function to plot query results with common formatting"""
+    # Helper function to plot query results with common formatting
     plt.figure(figsize=(12, 6))
     linestyle = '--' if param in ['k', 'r'] else '-'
     
@@ -39,7 +41,7 @@ def plot_query(data: pd.DataFrame, param: str, title: str, label_prefix: str):
         subset = data[data[param] == value]
         plt.plot(subset['N'], subset['time'], 
                     marker='o', linestyle=linestyle,
-                    label=f'{label_prefix}{value})' if param in ['k', 'r'] else f'{label_prefix}{value}')
+                    label=f'{label_prefix}{value}' if param in ['k', 'r'] else f'{label_prefix}{value}')
     
     plt.title(title)
     plt.xlabel("Dataset Size (N)")
@@ -51,6 +53,7 @@ def plot_query(data: pd.DataFrame, param: str, title: str, label_prefix: str):
     plt.show()
 
 def plot_relplot(data: pd.DataFrame, feature: str, title: str):
+    # Helper function to plot query results with relplot
     g = sns.relplot(
         data=data,
         x='N',

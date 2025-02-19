@@ -1,5 +1,6 @@
 ### grid_index.py --- Builds a grid index which divides the space into uniform cells 
 # and assigns each point to a cell based on its coordinates
+# and finds its execution time for kNN and Range querie
 
 from helper import check_bucket, euclidean_distance, expand_search_area, plot_relplot
 import pandas as pd
@@ -10,6 +11,16 @@ import time
 import random
 
 def build_grid_index(dataset: pd.DataFrame, cell_size: float) -> dict:
+    """
+    Builds the Grid Index.
+
+    Parameters:
+        dataset (pd.DataFrame): A DataFrame containing POI data with columns '@id', '@lat', '@lon', and 'name'.
+        cell_size (float): The size of each cell in the grid.
+
+    Returns:
+        dict: A dictionary containing the index for the grid.
+    """
 
     grid_index = {}
 
@@ -25,6 +36,7 @@ def knn_grid_search(dataset:pd.DataFrame, grid_index: dict, target_id: int, k: i
 
     Parameters:
         dataset (pd.DataFrame): A DataFrame containing POI data with columns '@id', '@lat', '@lon', and 'name'.
+        grid_index (dict): A dictionary containing the index for the grid.
         target_id (int): The ID of the target POI.
         k (int): The number of nearest neighbors to find.
         cell_size (float): The size of each cell in the grid.
@@ -66,6 +78,7 @@ def range_query_grid(dataset: pd.DataFrame, grid_index: dict, target_id: int, r:
 
     Parameters:
         dataset (pd.DataFrame): A DataFrame containing POI data with columns '@id', '@lat', '@lon', and 'name'.
+        grid_index (dict): A dictionary containing the index for the grid.
         target_id (int): The ID of the target POI.
         r (float): The distance within which to find the POIs.
         cell_size (float): The size of each cell in the grid.
@@ -107,8 +120,8 @@ def grid_experiments(dataset: pd.DataFrame, config: dict):
     Tests grid index performance with different cell sizes
     
     Parameters:
-        dataset: Full POI dataset
-        config: The set of configurations for the experiment
+        dataset (pd.DataFrame): A DataFrame containing POI data with columns '@id', '@lat', '@lon', and 'name'.
+        config (dict): The set of configurations for the experiment
     
     Returns:
         Tuple of (knn_results, range_results) DataFrames
@@ -121,7 +134,6 @@ def grid_experiments(dataset: pd.DataFrame, config: dict):
     for cell_size in config["cell_sizes"]:
         
         for n in config["N_list"]:
-            # Create subset
             mini_df = dataset.iloc[:n].copy()
             
             # Build grid once per cell_size/N combination
@@ -160,6 +172,13 @@ def grid_experiments(dataset: pd.DataFrame, config: dict):
     return pd.DataFrame(knn_results), pd.DataFrame(range_results)
 
 def plot_grid(knn_results: pd.DataFrame, range_results: pd.DataFrame):
+    """
+    Plots a graph of all the results from the experiments.
+    
+    Parameters:
+        knn_results (pd.DataFrame): A DataFrame containing the time, N, k, and cell_size values for kNN.
+        range_results (pd.DataFrame): A DataFrame containing the time, N, r, and cell_size values for Range Query.
+    """
 
     plot_relplot(knn_results, "k", 'Grid Index - kNN Query Performance by Dataset Size and Grid Resolution')
     plot_relplot(range_results, "r", 'Grid Index - Range Query Performance by Dataset Size and Grid Resolution')
