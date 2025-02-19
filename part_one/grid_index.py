@@ -102,7 +102,7 @@ def range_query_grid(dataset: pd.DataFrame, grid_index: dict, target_id: int, r:
     
     return sorted(results, key=lambda x: x[1])
 
-def grid_experiments(dataset, config):
+def grid_experiments(dataset: pd.DataFrame, config: dict):
     """
     Tests grid index performance with different cell sizes
     
@@ -122,7 +122,7 @@ def grid_experiments(dataset, config):
         
         for n in config["N_list"]:
             # Create subset
-            mini_df = dataset.iloc[:min(n, len(dataset))].copy()
+            mini_df = dataset.iloc[:n].copy()
             
             # Build grid once per cell_size/N combination
             grid = build_grid_index(mini_df, cell_size)
@@ -159,7 +159,11 @@ def grid_experiments(dataset, config):
     
     return pd.DataFrame(knn_results), pd.DataFrame(range_results)
 
-def plot_results(knn_results: pd.DataFrame, range_results: pd.DataFrame):
+def plot_grid(knn_results: pd.DataFrame, range_results: pd.DataFrame):
+
+    print("HERE2")
+    print(knn_results)
+    print(range_results)
 
     plot_query(knn_results, 'cell_size', "Grid Index - KNN Query Performance", "Cell ")
     plot_query(range_results, 'cell_size', "Grid Index - Range Query Performance", "Cell ")

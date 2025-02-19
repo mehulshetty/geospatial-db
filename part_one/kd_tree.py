@@ -148,7 +148,7 @@ def range_query_kd(root: Node, target_poi: dict, r: float):
     results.sort(key=lambda x: x[1])  # Sort by distance
     return results
 
-def kd_tree_experiments(dataset, config):
+def kd_tree_experiments(dataset: pd.DataFrame, config: dict):
     """
     Tests KD-Tree performance with different dataset sizes and query parameters.
     
@@ -163,7 +163,7 @@ def kd_tree_experiments(dataset, config):
     range_results = []
     
     for n in config["N_list"]:
-        mini_df = dataset.iloc[:min(n, len(dataset))].copy()
+        mini_df = dataset.iloc[:n].copy()
         
         # Build KD-Tree once per N
         start_build = time.perf_counter()
@@ -191,7 +191,7 @@ def kd_tree_experiments(dataset, config):
         for r in config["r_list"]:
             target_id = random.choice(mini_df['@id'].values)
             target_poi = mini_df[mini_df['@id'] == target_id].iloc[0]
-            
+
             start = time.perf_counter()
             range_query_kd(root, target_poi, r)
             total_time = time.perf_counter() - start
@@ -204,7 +204,11 @@ def kd_tree_experiments(dataset, config):
     
     return pd.DataFrame(knn_results), pd.DataFrame(range_results)
 
-def plot_results(knn_results: pd.DataFrame, range_results: pd.DataFrame):
+def plot_kd(knn_results: pd.DataFrame, range_results: pd.DataFrame):
+
+    print("HERE1")
+    print(knn_results.head())
+    print(range_results.head())
 
     plot_query(knn_results, 'k', "KD-Tree Index - kNN Query Performance", "k=")
     plot_query(range_results, 'r', "KD-Tree Index - Range Query Performance", "r=")

@@ -1,7 +1,9 @@
+### main.py --- 
 import pandas as pd
 
-from grid_index import grid_experiments, plot_results as plot_grid
-from kd_tree import kd_tree_experiments, plot_results as plot_kd
+from brute_force import brute_force_experiments, plot_brute_force
+from grid_index import grid_experiments, plot_grid
+from kd_tree import kd_tree_experiments, plot_kd
 
 df = pd.read_csv('../dataset/clean_nyc_dataset.csv')
 
@@ -14,9 +16,17 @@ config = {
 }
 
 # Run experiments
+print("Running Brute Force Experiments")
+#knn_results_brute_force, range_results_brute_force = brute_force_experiments(df, config)
+print("Running Grid Index Experiments")
 knn_results_grid, range_results_grid = grid_experiments(df, config)
-knn_results_kd, range_results_kd = kd_tree_experiments(df, config)
+print("Running KD-Tree Index Experiments")
+#knn_results_kd, range_results_kd = kd_tree_experiments(df, config)
 
 # Plot the Graph
+print("Plotting Brute Force")
+#plot_brute_force(knn_results_brute_force, range_results_brute_force)
+print("Plotting Grid")
 plot_grid(knn_results_grid, range_results_grid)
-plot_kd(knn_results_kd, range_results_kd)
+print("Plotting KD-Tree")
+#plot_kd(knn_results_kd, range_results_kd)
