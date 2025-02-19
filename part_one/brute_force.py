@@ -98,10 +98,6 @@ def brute_force_experiments(dataset: pd.DataFrame, config: dict):
 # Plot the Data
 def plot_brute_force(knn_results: pd.DataFrame, range_results: pd.DataFrame):
 
-    print("HERE3")
-    print(knn_results.head())
-    print(range_results.head())
-
     plot_query(knn_results, 'k', "Brute Force - kNN Query Performance", "k=")
     plot_query(range_results, 'r', "Brute Force - Range Query Performance", "r=")
 

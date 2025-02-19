@@ -205,11 +205,7 @@ def kd_tree_experiments(dataset: pd.DataFrame, config: dict):
     return pd.DataFrame(knn_results), pd.DataFrame(range_results)
 
 def plot_kd(knn_results: pd.DataFrame, range_results: pd.DataFrame):
-
-    print("HERE1")
-    print(knn_results.head())
-    print(range_results.head())
-
+    
     plot_query(knn_results, 'k', "KD-Tree Index - kNN Query Performance", "k=")
     plot_query(range_results, 'r', "KD-Tree Index - Range Query Performance", "r=")
 

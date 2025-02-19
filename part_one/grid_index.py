@@ -1,7 +1,7 @@
 ### grid_index.py --- Builds a grid index which divides the space into uniform cells 
 # and assigns each point to a cell based on its coordinates
 
-from helper import check_bucket, euclidean_distance, expand_search_area, plot_query
+from helper import check_bucket, euclidean_distance, expand_search_area, plot_relplot
 import pandas as pd
 import math
 import pandas as pd
@@ -161,12 +161,8 @@ def grid_experiments(dataset: pd.DataFrame, config: dict):
 
 def plot_grid(knn_results: pd.DataFrame, range_results: pd.DataFrame):
 
-    print("HERE2")
-    print(knn_results)
-    print(range_results)
-
-    plot_query(knn_results, 'cell_size', "Grid Index - KNN Query Performance", "Cell ")
-    plot_query(range_results, 'cell_size', "Grid Index - Range Query Performance", "Cell ")
+    plot_relplot(knn_results, "k", 'Grid Index - kNN Query Performance by Dataset Size and Grid Resolution')
+    plot_relplot(range_results, "r", 'Grid Index - Range Query Performance by Dataset Size and Grid Resolution')
 
     return None
 

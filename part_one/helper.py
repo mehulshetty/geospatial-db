@@ -3,6 +3,7 @@
 import math
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 def euclidean_distance(point_x, point_y) -> float:
     x1, y1 = point_x['@lat'], point_x['@lon']
@@ -47,4 +48,22 @@ def plot_query(data: pd.DataFrame, param: str, title: str, label_prefix: str):
     plt.yscale('log')
     plt.legend()
     plt.grid(True)
+    plt.show()
+
+def plot_relplot(data: pd.DataFrame, feature: str, title: str):
+    g = sns.relplot(
+        data=data,
+        x='N',
+        y='time',
+        hue=feature,
+        col='cell_size',
+        kind='line',
+        palette='pastel',
+        col_wrap=2
+    )
+    g.set(yscale="log")
+    g.set_axis_labels("Dataset Size (N)", "Query Execution Time (s)")
+    g.set_titles("Cell Size: {col_name}")
+    g.figure.subplots_adjust(top=0.85)
+    g.figure.suptitle(title)
     plt.show()

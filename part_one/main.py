@@ -15,18 +15,24 @@ config = {
     'r_list': [0.01, 0.05, 0.1, 0.2, 0.5]
 }
 
-# Run experiments
+
+## Experiments
 print("Running Brute Force Experiments")
-#knn_results_brute_force, range_results_brute_force = brute_force_experiments(df, config)
+knn_results_brute_force, range_results_brute_force = brute_force_experiments(df, config)
+
 print("Running Grid Index Experiments")
 knn_results_grid, range_results_grid = grid_experiments(df, config)
-print("Running KD-Tree Index Experiments")
-#knn_results_kd, range_results_kd = kd_tree_experiments(df, config)
 
-# Plot the Graph
+print("Running KD-Tree Index Experiments")
+knn_results_kd, range_results_kd = kd_tree_experiments(df, config)
+
+
+## Graphs
 print("Plotting Brute Force")
-#plot_brute_force(knn_results_brute_force, range_results_brute_force)
+plot_brute_force(knn_results_brute_force, range_results_brute_force)
+
 print("Plotting Grid")
 plot_grid(knn_results_grid, range_results_grid)
+
 print("Plotting KD-Tree")
-#plot_kd(knn_results_kd, range_results_kd)
+plot_kd(knn_results_kd, range_results_kd)
