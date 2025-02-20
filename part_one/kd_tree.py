@@ -6,6 +6,7 @@ import random
 import pandas as pd
 import time
 from helper import euclidean_distance, plot_query
+import heapq
 
 class Node:
     """
@@ -62,23 +63,19 @@ def knn_kd_search(root: Node, target_poi: dict, k: int):
     Returns:
         list: A list of the '@id' and '@dist' of the k-nearest neighbors.
     """
-    results = []
+    heap = []
     
     def search(node, depth=0):
-        if node is None:
+        # Current point and distance
+
+        if not node:
             return
         
-        # Current point and distance
         point = node.poi
         dist = euclidean_distance(point, target_poi)
-        
-        # Add point to results
-        results.append((dist, point))
-        
-        # Prune results to keep only top-k
-        if len(results) > k:
-            results.sort(key=lambda x: x[0])  # Sort by distance
-            results.pop()  # Remove farthest point
+        heapq.heappush(heap, (-dist, point))
+        if len(heap) > k:
+            heapq.heappop(heap)
         
         # Determine which subtree to explore first
         axis = node.axis
@@ -94,14 +91,9 @@ def knn_kd_search(root: Node, target_poi: dict, k: int):
         
         # Search the nearer subtree
         search(near_child, depth + 1)
-        
-        # Check if we need to search the farther subtree
-        if len(results) < k or abs(target_val - node_val) < results[-1][0]:
-            search(far_child, depth + 1)
     
     search(root)
-    results.sort(key=lambda x: x[0])
-    return [(p['@id'], d) for d, p in results]
+    return [(p['@id'], -d) for d, p in sorted(heap, key=lambda x: -x[0])]
 
 def range_query_kd(root: Node, target_poi: dict, r: float):
     """
@@ -115,7 +107,7 @@ def range_query_kd(root: Node, target_poi: dict, r: float):
     Returns:
         list: A list of the '@id' and '@dist' of all nearby POIs.
     """
-    results = []
+    heap = []
     
     def search(node, depth=0):
         if node is None:
@@ -125,7 +117,7 @@ def range_query_kd(root: Node, target_poi: dict, r: float):
         dist = euclidean_distance(point, target_poi)
         
         if dist <= r:
-            results.append((point['@id'], dist))
+            heapq.heappush(heap, (dist, point['@id']))
         
         # Determine which subtree to explore first
         axis = node.axis
@@ -147,8 +139,7 @@ def range_query_kd(root: Node, target_poi: dict, r: float):
             search(far_child, depth + 1)
     
     search(root)
-    results.sort(key=lambda x: x[1])  # Sort by distance
-    return results
+    return [(poi_id, dist) for dist, poi_id in heapq.nsmallest(len(heap), heap)]
 
 def kd_tree_experiments(dataset: pd.DataFrame, config: dict):
     """
